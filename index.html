@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正太身体控制模拟器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        #game {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+        }
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.3s ease;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>正太身体控制模拟器</h1>
+        <p id="story">有一天，你意外进入了这个小正太的身体，他也有意识，一直试图将你从他的身体里赶出去。你的目标是在不被人发现的情况下夺舍控制正太的身体，一直到正太的意识消散取代他。</p>
+        <div id="status">
+            <p>当前阶段：<span id="currentStage">夺舍前</span></p>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+            <p>进度：<span id="progressText">0</span>/100</p>
+        </div>
+        <div id="choices">
+            <button id="choice1">尝试控制身体</button>
+            <button id="choice2">隐藏自己</button>
+            <button id="choice3">与正太对话</button>
+        </div>
+        <p id="result"></p>
+    </div>
+    <script>
+        const stages = [
+            { name: "夺舍前", max: 100 },
+            { name: "控制中", max: 100 },
+            { name: "适应中", max: 100 },
+            { name: "占据中", max: 100 },
+            { name: "彻底取代", max: 100 }
+        ];
+
+        let currentStage = 0;
+        let currentProgress = 0;
+        let concealment = 50;  // 隐藏值（0-100）
+        let resistance = 30;   // 正太抵抗值
+
+        function updateProgress(value) {
+            const gain = Math.floor(Math.random() * 5) + 3;
+            currentProgress = Math.min(currentProgress + gain, stages[currentStage].max);
+            
+            document.getElementById("progressText").textContent = currentProgress;
+            document.getElementById("progressFill").style.width = 
+                (currentProgress / stages[currentStage].max * 100) + "%";
+
+            if (currentProgress >= stages[currentStage].max) {
+                if (currentStage < stages.length - 1) {
+                    currentStage++;
+                    currentProgress = 0;
+                    document.getElementById("currentStage").textContent = stages[currentStage].name;
+                    showMessage(`进入新阶段：${stages[currentStage].name}！`);
+                } else {
+                    endGame("你已完全取代正太的意识，获得了身体的控制权！");
+                }
+            }
+        }
+
+        function showMessage(text) {
+            const result = document.getElementById("result");
+            result.innerHTML = text + "<br>" + result.innerHTML;
+        }
+
+        document.getElementById("choice1").addEventListener("click", () => {
+            const gain = Math.floor(Math.random() * 5) + 3;
+            updateProgress(gain);
+            showMessage(`精神施压成功！进度+${gain}`);
+            
+            concealment = Math.max(0, concealment - 5);
+            checkDetection();
+        });
+
+        document.getElementById("choice2").addEventListener("click", () => {
+            concealment = Math.min(100, concealment + 15);
+            showMessage("伪装模仿成功！存在感降低");
+            checkDetection();
+        });
+
+        document.getElementById("choice3").addEventListener("click", () => {
+            resistance = Math.max(0, resistance - 8);
+            showMessage(`意识渗透成功！正太抵抗值降至 ${resistance}`);
+        });
+
+        function checkDetection() {
+            if (concealment < 20) {
+                endGame("你被正太发现了！意识被强行驱逐...");
+            }
+        }
+
+        function endGame(message) {
+            showMessage("<strong>游戏结束：</strong>" + message);
+            document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        }
+    </script>
+</body>
+</html>
